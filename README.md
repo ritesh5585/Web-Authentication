@@ -48,18 +48,18 @@ Your supplied notes start from the same problem: HTTP is stateless, so the next 
 
 | Document | What you learn |
 |---|---|
-| [`01-foundations.md`](./docs/01-foundations.md) | Authentication, authorization, validation, 401 vs 403, trust boundaries |
-| [`02-password-auth.md`](./docs/02-password-auth.md) | Register/login, bcrypt, MongoDB, credential security |
-| [`03-jwt-and-rbac.md`](./docs/03-jwt-and-rbac.md) | JWT internals, signing, verification, RBAC, route guards |
-| [`04-access-refresh.md`](./docs/04-access-refresh.md) | Why access + refresh tokens exist, storage, rotation, reuse detection |
-| [`05-google-oauth.md`](./docs/05-google-oauth.md) | OAuth 2.0, OpenID Connect, Google setup, Passport, callback flow |
-| [`06-browser-storage.md`](./docs/06-browser-storage.md) | localStorage, cookies, memory, HttpOnly, Secure, SameSite, Path |
-| [`07-security-attacks.md`](./docs/07-security-attacks.md) | XSS, CSRF, session fixation, token theft, CSP, logging leaks |
-| [`08-production-auth.md`](./docs/08-production-auth.md) | sessions, multi-device login, logout, revocation, scaling, observability |
-| [`09-engineering-setup.md`](./docs/09-engineering-setup.md) | MERN implementation blueprint and package choices |
-| [`10-interview-playbook.md`](./docs/10-interview-playbook.md) | Expected questions, traps, debugging questions, strong answers |
-| [`11-visual-flows.md`](./docs/11-visual-flows.md) | Mermaid diagrams + request/response flows |
-| [`12-cheatsheet.md`](./docs/12-cheatsheet.md) | Final revision sheet before interview |
+| [`01-foundations.md`](./authentication-engineering-notes/docs/01-foundations.md) | Authentication, authorization, validation, 401 vs 403, trust boundaries |
+| [`02-password-auth.md`](./authentication-engineering-notes/docs/02-password-auth.md) | Register/login, bcrypt, MongoDB, credential security |
+| [`03-jwt-and-rbac.md`](./authentication-engineering-notes/docs/03-jwt-and-rbac.md) | JWT internals, signing, verification, RBAC, route guards |
+| [`04-access-refresh.md`](./authentication-engineering-notes/docs/04-access-refresh.md) | Why access + refresh tokens exist, storage, rotation, reuse detection |
+| [`05-google-oauth.md`](./authentication-engineering-notes/docs/05-google-oauth.md) | OAuth 2.0, OpenID Connect, Google setup, Passport, callback flow |
+| [`06-browser-storage.md`](./authentication-engineering-notes/docs/06-browser-storage.md) | localStorage, cookies, memory, HttpOnly, Secure, SameSite, Path |
+| [`07-security-attacks.md`](./authentication-engineering-notes/docs/07-security-attacks.md) | XSS, CSRF, session fixation, token theft, CSP, logging leaks |
+| [`08-production-auth.md`](./authentication-engineering-notes/docs/08-production-auth.md) | sessions, multi-device login, logout, revocation, scaling, observability |
+| [`09-engineering-setup.md`](./authentication-engineering-notes/docs/09-engineering-setup.md) | MERN implementation blueprint and package choices |
+| [`10-interview-playbook.md`](./authentication-engineering-notes/docs/10-interview-playbook.md) | Expected questions, traps, debugging questions, strong answers |
+| [`11-visual-flows.md`](./authentication-engineering-notes/docs/11-visual-flows.md) | Mermaid diagrams + request/response flows |
+| [`12-cheatsheet.md`](./authentication-engineering-notes/docs/12-cheatsheet.md) | Final revision sheet before interview |
 
 ---
 
