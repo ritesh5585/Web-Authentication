@@ -1,5 +1,4 @@
 import dotenv from "dotenv"
-
 dotenv.config()
 
 function getEnv(key, required = true, defaultValue = null) {
@@ -21,7 +20,8 @@ export const config = {
     MONGO_URI: getEnv('MONGO_URI'),
 
     // Authentication
-    JWT: getEnv('JWT_TOKEN'),
+    ACCESS: getEnv('ACCESS_TOKEN'),
+    REFRESH: getEnv("REFRESH_TOKEN"),
     GOOGLE_ID: getEnv('GOOGLE_CLIENT_ID'),
     GOOGLE_SECRET: getEnv('GOOGLE_CLIENT_SECRET')
 }

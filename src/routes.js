@@ -13,6 +13,9 @@ import {
 
 const router = Router();
 
+//Refresh token routes
+router.post("/refresh")
+
 // Register & Login
 router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);
@@ -25,8 +28,6 @@ router.post('/reset-password', resetPassword);
 router.get('/me', authenticateUser, getMe);
 router.post('/logout', authenticateUser, logout);
 
-// ============ GOOGLE OAUTH ROUTES ============
-// These are handled by Passport
 // The callback is automatically called by Google after authentication
 router.get('/google/callback', googleCallback);
 

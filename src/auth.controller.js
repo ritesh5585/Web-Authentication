@@ -10,7 +10,6 @@ const COOKIE_OPTS = {
     path: '/',
 };
 
-// ============ HELPER FUNCTIONS ============
 const createToken = (userId) => jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '7d' });
 
 const setCookie = (res, user) => {
@@ -39,8 +38,6 @@ const errorResponse = (res, message, status = 500, error = null) => {
         ...(process.env.NODE_ENV === 'development' && error && { error: error.message }),
     });
 };
-
-// ============ AUTH CONTROLLERS ============
 
 /**
  * Register new user
@@ -191,7 +188,7 @@ export const forgotPassword = async (req, res) => {
         if (user) {
 
             const token = crypto.getRandomBytes(32).toString("hex")
-            // await sendResetEmail(email, token);
+            //  await sendResetEmail(email, token);
         }
 
         res.status(200).json({

@@ -1,11 +1,13 @@
 import express from "express";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import connectToDb from "./src/db.js";
 import cookieParser from "cookie-parser";
 import buildPage from "./buildPage.js";
 import authRouter from "./src/routes.js";
 import { config } from "./src/config.js";
 
+await connectToDb()
 const app = express();
 
 app.use(express.json());
@@ -117,13 +119,5 @@ app.use((req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log('\n🚀 =========================================');
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log('🚀 =========================================');
-    console.log(`📧 Login:      http://localhost:${PORT}/`);
-    console.log(`📝 Register:   http://localhost:${PORT}/register`);
-    console.log(`🔑 Forgot:     http://localhost:${PORT}/forgot-password`);
-    console.log(`📊 Dashboard:  http://localhost:${PORT}/dashboard`);
-    console.log(`👤 Profile:    http://localhost:${PORT}/profile`);
-    console.log('🚀 =========================================\n');
 });
