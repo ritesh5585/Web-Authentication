@@ -31,7 +31,7 @@ const successResponse = (res, user, message, status = 200) => {
 };
 
 const errorResponse = (res, message, status = 500, error = null) => {
-    console.error(`❌ ${message}:`, error?.message || '');
+    console.error(`${message}:`, error?.message || '');
     res.status(status).json({
         success: false,
         message,
