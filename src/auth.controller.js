@@ -1,20 +1,5 @@
-import jwt from 'jsonwebtoken';
 import userModel from './auth.model.js';
-import { config } from './config.js';
-
-const JWT_SECRET = config.JWT || process.env.JWT_SECRET;
-
-const COOKIE_OPTS = {
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/',
-};
-
-const createToken = (userId) => jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '7d' });
-
-const setCookie = (res, user) => {
-    res.cookie('token', createToken(user._id), COOKIE_OPTS);
-};
+import { generateToken } from './auth.token.js';
 
 const getUserData = (user) => ({
     id: user._id,
@@ -44,7 +29,7 @@ const errorResponse = (res, message, status = 500, error = null) => {
  * POST /api/auth/register
  */
 export const register = async (req, res) => {
-    const { email, contact, password, fullname, isSeller = false } = req.body;
+    const { email, contact, password, fullname } = req.body;
 
     if (!email || !contact || !password || !fullname) {
         return errorResponse(res, 'All fields are required', 400);
@@ -61,12 +46,13 @@ export const register = async (req, res) => {
         }
 
         const user = await userModel.create({
-            email: email.toLowerCase(),
-            contact,
-            password,
             fullname: fullname.trim(),
-            role: isSeller ? 'seller' : 'buyer',
+            contact,
+            email: email.toLowerCase(),
+            password,
         });
+
+        const {accessToken, refreshToken} = generateToken({userId: user._id})
 
         successResponse(res, user, 'Registration successful');
 

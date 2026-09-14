@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        minlength: [3, "Email must be at least 3 characters long"],
     },
     contact: {
         type: String,
@@ -16,6 +17,10 @@ const userSchema = new mongoose.Schema({
         required: function () {
             return !this.googleId
         }
+    },
+    refresghToken: {
+        type: String,
+        default: null
     },
     fullname: {
         type: String,
