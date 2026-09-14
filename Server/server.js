@@ -20,13 +20,8 @@ app.use(autoRefresh);
 app.use(passport.initialize());
 
 const hasCredentials = config.GOOGLE_ID && config.GOOGLE_SECRET;
-
-passport.use(new GoogleStrategy({
-    clientID: config.GOOGLE_ID,
-    clientSecret: config.GOOGLE_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
-    proxy: true
-}, (accessToken, refreshToken, profile, done) => done(null, profile)));
+const googleCallbackUrl = config.GOOGLE_CALLBACK_URL ||
+    `http://localhost:${process.env.PORT || 3000}/api/auth/google/callback`;
 
 // Login Page
 app.get("/", (req, res) => {
@@ -76,9 +71,18 @@ app.get("/reset-password", (req, res) => {
     res.send(buildPage({ user: null, page: 'reset', token, error, success }));
 });
 
+passport.use(new GoogleStrategy({
+    clientID: config.GOOGLE_ID,
+    clientSecret: config.GOOGLE_SECRET,
+    callbackURL: googleCallbackUrl,
+    proxy: true
+}, (accessToken, refreshToken, profile, done) => done(null, profile)));
+console.log('Google Callback URL:', googleCallbackUrl);
+
+
 // Initiate Google Login
 app.get(
-    "/auth/google",
+    "/api/auth/google",
     (req, res, next) => {
         if (!hasCredentials) {
             return res.send(buildPage({
@@ -94,7 +98,7 @@ app.get(
 
 // Google OAuth Callback
 app.get(
-    "/auth/google/callback",
+    "/api/auth/google/callback",
     passport.authenticate("google", {
         session: false,
         failureRedirect: "/?error=Google authentication failed"
@@ -103,13 +107,6 @@ app.get(
 );
 app.use('/api/auth', authRouter);
 
-app.use((req, res) => {
-    res.status(404).send(buildPage({
-        user: null,
-        page: 'login',
-        error: 'Page not found'
-    }));
-});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(` Server running on http://localhost:${PORT}`);

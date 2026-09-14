@@ -29,6 +29,12 @@ const errorResponse = (res, message, status = 500, error = null) => {
     });
 };
 
+const wantsHtml = (req) => req.accepts('html') && !req.is('json');
+
+const redirectWithMessage = (res, path, key, message) => {
+    res.redirect(`${path}?${key}=${encodeURIComponent(message)}`);
+};
+
 export const register = async (req, res) => {
     const { email, contact, password, fullname } = req.body;
 
@@ -60,8 +66,14 @@ export const register = async (req, res) => {
 
         setCookie(res, { accessToken, refreshToken });
 
+        if (wantsHtml(req)) {
+            return redirectWithMessage(res, '/dashboard', 'success', 'Registration successful');
+        }
         successResponse(res, user, 'Registration successful', 201);
     } catch (err) {
+        if (wantsHtml(req)) {
+            return redirectWithMessage(res, '/register', 'error', 'Registration failed');
+        }
         errorResponse(res, 'Registration failed', 500, err);
     }
 };
@@ -93,8 +105,14 @@ export const login = async (req, res) => {
 
         setCookie(res, { accessToken, refreshToken });
 
+        if (wantsHtml(req)) {
+            return redirectWithMessage(res, '/dashboard', 'success', 'Login successful');
+        }
         successResponse(res, user, 'Login successful');
     } catch (err) {
+        if (wantsHtml(req)) {
+            return redirectWithMessage(res, '/', 'error', 'Login failed');
+        }
         errorResponse(res, 'Login failed', 500, err);
     }
 };
@@ -158,6 +176,9 @@ export const logout = async (req, res) => {
 
         clearCookie(res);
 
+        if (wantsHtml(req)) {
+            return redirectWithMessage(res, '/', 'success', 'Logged out successfully');
+        }
         res.status(200).json({
             success: true,
             message: 'Logged out successfully',
@@ -196,12 +217,10 @@ export const googleCallback = async (req, res) => {
 
         setCookie(res, { accessToken, refreshToken });
 
-        const redirectUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-        res.redirect(redirectUrl);
+        res.redirect('/dashboard?success=Google%20login%20successful');
     } catch (err) {
         console.error('Google Auth Error:', err);
-        const redirectUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-        res.redirect(`${redirectUrl}/login?error=google_auth_failed`);
+        res.redirect('/?error=Google%20authentication%20failed');
     }
 };
 

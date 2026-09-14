@@ -6,7 +6,6 @@ import {
     login,
     getMe,
     logout,
-    googleCallback,
     forgotPassword,
     resetPassword,
     refreshAccessToken
@@ -28,8 +27,5 @@ router.post('/reset-password', resetPassword);
 // These routes require authentication (JWT token)
 router.get('/me', authenticateUser, getMe);
 router.post('/logout', authenticateUser, logout);
-
-// The callback is automatically called by Google after authentication
-router.get('/google/callback', googleCallback);
 
 export default router;

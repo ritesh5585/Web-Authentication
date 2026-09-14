@@ -23,5 +23,6 @@ export const config = {
     ACCESS_TOKEN: getEnv('ACCESS_TOKEN'),
     REFRESH_TOKEN: getEnv("REFRESH_TOKEN"),
     GOOGLE_ID: getEnv('GOOGLE_CLIENT_ID', false),
-    GOOGLE_SECRET: getEnv('GOOGLE_CLIENT_SECRET', false)
+    GOOGLE_SECRET: getEnv('GOOGLE_CLIENT_SECRET', false),
+    GOOGLE_CALLBACK_URL: getEnv('GOOGLE_CALLBACK_URL', false)
 }
