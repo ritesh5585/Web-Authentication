@@ -6,20 +6,24 @@ import cookieParser from "cookie-parser";
 import buildPage from "./buildPage.js";
 import authRouter from "./src/routes.js";
 import { config } from "./src/config.js";
+import { autoRefresh } from "./src/auth.middleware.js";
+import userModel from "./src/auth.model.js";
+import { googleCallback } from "./src/auth.controller.js";
 
-await connectToDb()
+await connectToDb();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(autoRefresh);
 app.use(passport.initialize());
 
-const hasCredentials = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
+const hasCredentials = config.GOOGLE_ID && config.GOOGLE_SECRET;
 
 passport.use(new GoogleStrategy({
-    clientID: config.GOOGLE_ID || process.env.GOOGLE_CLIENT_ID,
-    clientSecret: config.GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET,
+    clientID: config.GOOGLE_ID,
+    clientSecret: config.GOOGLE_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
     proxy: true
 }, (accessToken, refreshToken, profile, done) => done(null, profile)));
@@ -38,23 +42,23 @@ app.get("/register", (req, res) => {
 });
 
 // Dashboard Page (Protected)
-app.get("/dashboard", (req, res) => {
-    const { id, name, email, photo, error, success } = req.query;
-    const user = id ? { id, name, email, photo } : null;
-    if (!user) {
+app.get("/dashboard", async (req, res) => {
+    if (!req.user) {
         return res.redirect('/?error=Please login first');
     }
-    res.send(buildPage({ user, page: 'dashboard', error, success }));
+    const user = await userModel.findById(req.user.id).select('-password -refreshToken').lean();
+    if (!user) return res.redirect('/?error=Please login first');
+    res.send(buildPage({ user: { id: user._id, name: user.fullname, email: user.email, photo: user.profilepic, googleId: user.googleId }, page: 'dashboard', ...req.query }));
 });
 
 // Profile Page (Protected)
-app.get("/profile", (req, res) => {
-    const { id, name, email, photo, error, success } = req.query;
-    const user = id ? { id, name, email, photo } : null;
-    if (!user) {
+app.get("/profile", async (req, res) => {
+    if (!req.user) {
         return res.redirect('/?error=Please login first');
     }
-    res.send(buildPage({ user, page: 'profile', error, success }));
+    const user = await userModel.findById(req.user.id).select('-password -refreshToken').lean();
+    if (!user) return res.redirect('/?error=Please login first');
+    res.send(buildPage({ user: { id: user._id, name: user.fullname, email: user.email, photo: user.profilepic, googleId: user.googleId }, page: 'profile', ...req.query }));
 });
 
 // Forgot Password Page
@@ -69,7 +73,7 @@ app.get("/reset-password", (req, res) => {
     if (!token) {
         return res.redirect('/forgot-password?error=Invalid reset link');
     }
-    res.send(buildPage({ user: null, page: 'reset', error, success }));
+    res.send(buildPage({ user: null, page: 'reset', token, error, success }));
 });
 
 // Initiate Google Login
@@ -95,18 +99,7 @@ app.get(
         session: false,
         failureRedirect: "/?error=Google authentication failed"
     }),
-    (req, res) => {
-        const user = req.user;
-        const id = user.id || "";
-        const name = user.displayName || "";
-        const email = user.emails?.[0]?.value || "";
-        const photo = user.photos?.[0]?.value || "";
-
-        // Check if user has role, if not set default
-        const role = user.role || 'buyer';
-
-        res.redirect(`/dashboard?id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&photo=${encodeURIComponent(photo)}&role=${encodeURIComponent(role)}&success=Welcome%20${encodeURIComponent(name)}!`);
-    }
+    googleCallback
 );
 app.use('/api/auth', authRouter);
 

@@ -20,8 +20,8 @@ export const config = {
     MONGO_URI: getEnv('MONGO_URI'),
 
     // Authentication
-    ACCESS: getEnv('ACCESS_TOKEN'),
-    REFRESH: getEnv("REFRESH_TOKEN"),
-    GOOGLE_ID: getEnv('GOOGLE_CLIENT_ID'),
-    GOOGLE_SECRET: getEnv('GOOGLE_CLIENT_SECRET')
+    ACCESS_TOKEN: getEnv('ACCESS_TOKEN'),
+    REFRESH_TOKEN: getEnv("REFRESH_TOKEN"),
+    GOOGLE_ID: getEnv('GOOGLE_CLIENT_ID', false),
+    GOOGLE_SECRET: getEnv('GOOGLE_CLIENT_SECRET', false)
 }

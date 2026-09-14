@@ -2,7 +2,7 @@
  * Complete Authentication UI System
  * All pages: Login, Register, Dashboard, Profile, Forgot Password, Reset Password
  */
-function buildPage({ user = null, page = 'login', error = null, success = null } = {}) {
+function buildPage({ user = null, page = 'login', error = null, success = null, token = '' } = {}) {
   const isLoggedIn = user && user.id;
 
   // ============ BASE HTML TEMPLATE ============
@@ -393,8 +393,8 @@ function buildPage({ user = null, page = 'login', error = null, success = null }
       </div>
 
       <!-- ============ MESSAGES ============ -->
-      ${error ? `<div class="message message-error">❌ ${error}</div>` : ''}
-      ${success ? `<div class="message message-success">✅ ${success}</div>` : ''}
+      ${error ? `<div class="message message-error">${escapeHtml(error)}</div>` : ''}
+      ${success ? `<div class="message message-success">${escapeHtml(success)}</div>` : ''}
 
       <!-- ============ PAGE CONTENT ============ -->
       ${content}
@@ -522,14 +522,6 @@ function buildPage({ user = null, page = 'login', error = null, success = null }
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Account Type</label>
-          <select name="isSeller">
-            <option value="false">Buyer</option>
-            <option value="true">Seller</option>
-          </select>
-        </div>
-
         <button type="submit" class="btn btn-primary">Create Account</button>
       </form>
 
@@ -569,10 +561,6 @@ function buildPage({ user = null, page = 'login', error = null, success = null }
         <div class="stat-card">
           <div class="stat-number">${user?.id ? '🆔' : '—'}</div>
           <div class="stat-label">User ID</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${user?.role || 'User'}</div>
-          <div class="stat-label">Role</div>
         </div>
         <div class="stat-card">
           <div class="stat-number">${user?.googleId ? '🔗' : '📧'}</div>
@@ -667,7 +655,7 @@ function buildPage({ user = null, page = 'login', error = null, success = null }
       <p class="subtitle">Enter your new password</p>
 
       <form action="/api/auth/reset-password" method="POST">
-        <input type="hidden" name="token" value="${new URLSearchParams(window.location.search).get('token') || ''}" />
+        <input type="hidden" name="token" value="${escapeHtml(token)}" />
         
         <div class="form-group">
           <label>New Password</label>
@@ -709,6 +697,16 @@ function buildPage({ user = null, page = 'login', error = null, success = null }
       reset: 'Set new password',
     };
     return taglines[page] || 'Authentication System';
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[character]));
   }
 }
 

@@ -1,5 +1,5 @@
 import {
-    verifyAcccessToken as verifyAccessToken,
+    verifyAccessToken,
     verifyRefreshToken,
     generateToken
 } from './auth.token.js';
@@ -9,11 +9,9 @@ import userModel from "./auth.model.js";
 export const protect = async (req, res, next) => {
     let token;
 
-    // Check cookies
     if (req.cookies?.accessToken) {
         token = req.cookies.accessToken;
-    }
-    else if (req.headers.authorization?.startsWith('Bearer')) {
+    } else if (req.headers.authorization?.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
 
@@ -32,17 +30,17 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({
             success: false,
             message: 'Access token expired',
-            code: 'TOKEN_EXPIRED',  // Client ko batao refresh kare
+            code: 'TOKEN_EXPIRED',
         });
     }
 };
 
 export const autoRefresh = async (req, res, next) => {
-    let accessToken = req.cookies?.accessToken;
+    const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-        return next(); // No refresh token, continue as guest
+        return next();
     }
 
     try {
@@ -52,6 +50,7 @@ export const autoRefresh = async (req, res, next) => {
                 req.user = { id: decoded.id };
                 return next();
             } catch (e) {
+                // Access token invalid, try refresh below
             }
         }
 
