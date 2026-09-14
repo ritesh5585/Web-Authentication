@@ -16,3 +16,19 @@ export function generateToken({userId}) {
 
     return { accessToken, refreshToken }
 }
+
+export function verifyAcccessToken(token){
+    try {
+        return jwt.varify(token, config.ACCESS_TOKEN)
+    } catch (error) {
+        console.error("Invalid access token")
+    }
+}
+
+export function verifyRefreshToken(token){
+    try {
+        return jwt.verify(token, config.REFRESH_TOKEN)
+    } catch (error) {
+        console.error("Invalid refresh token found")
+    }
+}

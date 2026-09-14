@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateUser } from './auth.middleware.js';
+import { protect as authenticateUser  } from './auth.middleware.js';
 import { validateRegister, validateLogin } from './auth.validator.js';
 import {
     register,
@@ -9,12 +9,13 @@ import {
     googleCallback,
     forgotPassword,
     resetPassword,
+    refreshAccessToken
 } from './auth.controller.js';
 
 const router = Router();
 
 //Refresh token routes
-router.post("/refresh")
+router.post("/refresh", refreshAccessToken)
 
 // Register & Login
 router.post('/register', validateRegister, register);

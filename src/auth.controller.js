@@ -11,8 +11,11 @@ const getUserData = (user) => ({
 });
 
 const successResponse = (res, user, message, status = 200) => {
-    setCookie(res, user);
-    res.status(status).json({ success: true, message, user: getUserData(user) });
+    res.status(status).json({
+        success: true,
+        message,
+        user: getUserData(user)
+    });
 };
 
 const errorResponse = (res, message, status = 500, error = null) => {
@@ -52,7 +55,12 @@ export const register = async (req, res) => {
             password,
         });
 
-        const {accessToken, refreshToken} = generateToken({userId: user._id})
+        const { accessToken, refreshToken } = generateToken({ userId: user._id })
+
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })
+
+        setCookie(res, { refreshToken, accessToken })
 
         successResponse(res, user, 'Registration successful');
 
@@ -74,10 +82,18 @@ export const login = async (req, res) => {
 
     try {
         const user = await userModel.findOne({ email: email.toLowerCase() });
+        const isMatch = await user.comparePassword(password)
 
-        if (!user || !(await user.comparePassword(password))) {
+        if (!user || !isMatch) {
             return errorResponse(res, 'Invalid credentials', 401);
         }
+
+        const { accessToken, refreshToken } = generateToken({ userId: user._id })
+
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })
+
+        setCookie(res, { accessToken, refreshToken })
 
         successResponse(res, user, 'Login successful');
 
@@ -85,6 +101,39 @@ export const login = async (req, res) => {
         errorResponse(res, 'Login failed', 500, err);
     }
 };
+
+/**
+ * POST /api/auth/refreshAccessToken
+ */
+export const refreshAccessToken = async (req, res) => {
+    const { refreshToken } = req.cookies
+    if (!refreshToken) return errorResponse(res, "Invalid Token or not found", 401)
+
+    try {
+        const decoded = verifyRefreshToken(refreshToken);
+
+        const user = await userModel.findById(decoded.id);
+
+        if (!user || user.refreshToken !== refreshToken) {
+            return errorResponse(res, 'Invalid refresh token', 403);
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = generateToken({
+            userId: user._id,
+        });
+
+        user.refreshToken = newRefreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        setCookie(res, { accessToken, refreshToken: newRefreshToken });
+        successResponse(res, "token refreshed successfully", 200)
+
+    } catch (err) {
+        clearCookie(res);
+        errorResponse(res, 'Session expired. Please login again', 401, err);
+    }
+}
+
 
 /**
  * Get current user profile
@@ -109,9 +158,26 @@ export const getMe = async (req, res) => {
  * Logout user
  * POST /api/auth/logout
  */
-export const logout = (req, res) => {
-    res.clearCookie('token', { ...COOKIE_OPTS, maxAge: 0 });
-    res.status(200).json({ success: true, message: 'Logged out successfully' });
+export const logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.cookies;
+
+        if (refreshToken) {
+            await userModel.findOneAndUpdate(
+                { refreshToken },
+                { refreshToken: null }
+            );
+        }
+
+        clearCookie(res);
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully',
+        });
+    } catch (err) {
+        errorResponse(res, 'Logout failed', 500, err);
+    }
 };
 
 /**
@@ -137,8 +203,8 @@ export const googleCallback = async (req, res) => {
                 googleId,
                 fullname: displayName || 'Google User',
                 profilepic: photos?.[0]?.value || '',
-                isVerified: true, 
-                role: 'buyer', 
+                isVerified: true,
+                role: 'buyer',
             });
         } else if (!user.googleId) {
             user.googleId = googleId;
@@ -199,11 +265,11 @@ export const resetPassword = async (req, res) => {
     }
 
     try {
-        const user = userModel.findOne({ resetToken: token})
-        if(!user) return errorResponse(res, 'Invalid token', 400);
-            user.password = newPassword
+        const user = userModel.findOne({ resetToken: token })
+        if (!user) return errorResponse(res, 'Invalid token', 400);
+        user.password = newPassword
 
-            await user.save()
+        await user.save()
         res.status(200).json({
             success: true,
             message: 'Password reset successfully',
