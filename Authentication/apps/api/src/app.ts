@@ -1,6 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
+import { prisma } from "./db/prisma.js";
 import { env } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
@@ -21,7 +22,12 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+app.get("/health/db", async (_req, res) => {
+  await prisma.$queryRaw`SELECT 1`;
+  res.json({ status: "ok", db: "connected" });
+});
+
 export default app;
 
-app.use(notFound)
-app.use(errorHandler)
+app.use(notFound);
+app.use(errorHandler);
