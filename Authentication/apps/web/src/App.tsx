@@ -1,6 +1,13 @@
+import { Route, Routes } from "react-router"
+
 const App = () => {
   return (
-    <div>App</div>
+    <Routes>
+      <Route path="/register" element={<App/>} />
+      <Route path="*" element={<App/>} />
+      <Route path="/verify-email" />
+      <Route path="/login" />
+    </Routes>
   )
 }
 
