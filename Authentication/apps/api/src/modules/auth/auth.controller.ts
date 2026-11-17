@@ -10,8 +10,6 @@ export const verifyEmail: RequestHandler = async (req, res) => {
   await authService.verifyEmail({
     email: req.body.email,
     code: req.body.otp,
-    name: req.body.name,
-    password: req.body.password,
   });
   res.json({ message: "Email verified" });
 };

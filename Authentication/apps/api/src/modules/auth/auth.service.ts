@@ -48,7 +48,11 @@ async function issueVerifyOtp(user: {
   await sendOtpEmail(user.email, user.name, code); // DB commit ke BAAD
 }
 
-export async function register(input: { name: string; email: string }) {
+export async function register(input: {
+  name: string;
+  email: string;
+  password: string;
+}) {
   const existing = await prisma.user.findUnique({
     where: { email: input.email },
   });
@@ -56,11 +60,20 @@ export async function register(input: { name: string; email: string }) {
     throw new AppError(409, "Email already registered", "EMAIL_TAKEN");
   }
 
+  const passwordHash = await hashPassword(input.password);
+
   try {
     const user = existing
-      ? existing
+      ? await prisma.user.update({
+          where: { id: existing.id },
+          data: { name: input.name, passwordHash },
+        })
       : await prisma.user.create({
-          data: { name: input.name, email: input.email },
+          data: {
+            name: input.name,
+            email: input.email,
+            passwordHash,
+          },
         });
     await issueVerifyOtp(user);
   } catch (e) {
@@ -77,8 +90,6 @@ export async function register(input: { name: string; email: string }) {
 export async function verifyEmail(input: {
   email: string;
   code: string;
-  name: string;
-  password: string;
 }) {
   const user = await prisma.user.findUnique({
     where: { email: input.email },
@@ -106,7 +117,6 @@ export async function verifyEmail(input: {
   }
   if (!verifyOtpHash(input.code, otp.codeHash)) throw invalidOtp();
 
-  const passwordHash = await hashPassword(input.password);
   await prisma.$transaction(async (tx) => {
     const consumed = await tx.otpCode.updateMany({
       where: { id: otp.id, usedAt: null },
@@ -117,8 +127,6 @@ export async function verifyEmail(input: {
     await tx.user.update({
       where: { id: user.id },
       data: {
-        name: input.name,
-        passwordHash,
         emailVerifiedAt: new Date(),
       },
     });
