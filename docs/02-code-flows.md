@@ -134,31 +134,27 @@ exports.cookieOptions = {
 ## 3. REGISTER — flow
 
 ```text
-POST /api/auth/register {email, password}
+POST /api/auth/register {name, email}
    │
-   ▼  rate limit (per IP)
-   ▼  validate: email format, password length ≥ 8 (and ≤ 128) — zod
-   ▼  duplicate email?  ──yes──▶ 409 (or generic response + verification email)
-   ▼  bcrypt.hash(password, 12)
-   ▼  User.create({ email, passwordHash })
-   ▼  (production: send verification email; don't trust unverified email)
-   ▼  201
+   ▼  validate name + email; reject extra fields
+   ▼  verified email already exists? ──yes──▶ 409
+   ▼  create pending user (passwordHash is null), or reuse pending user
+   ▼  store a hashed, expiring email-verification OTP
+   ▼  send verification email
+   ▼  200
+   │
+   ▼
+POST /api/auth/verify-email {email, otp, name, password}
+   │
+   ▼  validate six-digit OTP, name, and password (8–128 chars)
+   ▼  check expiry and attempt limit
+   ▼  hash password with Argon2
+   ▼  atomically consume OTP and set name, passwordHash, emailVerifiedAt
+   ▼  200
 ```
 
-```js
-// controllers/authController.js
-const bcrypt = require("bcrypt");
-
-exports.register = async (req, res) => {
-  const { email, password } = req.body;                 // already validated by middleware
-  if (await User.exists({ email })) {
-    return res.status(409).json({ message: "Email already registered" });
-  }
-  const passwordHash = await bcrypt.hash(password, 12); // cost 12 ≈ 200–300 ms
-  const user = await User.create({ email, passwordHash });
-  res.status(201).json({ id: user.id, email: user.email });
-};
-```
+`POST /api/auth/resend-otp {email}` can request another code for a pending
+account; resend requests are subject to a cooldown.
 
 > Never accept `role` from `req.body` on register. That is **mass assignment** — attackers send `{"role":"admin"}`.
 

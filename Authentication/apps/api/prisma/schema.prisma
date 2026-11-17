@@ -16,6 +16,7 @@ model User {
   deletedAt       DateTime? // soft delete
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  otpCodes        OtpCode[]
 }
 
 enum OtpPurpose {
