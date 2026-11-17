@@ -14,16 +14,28 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
       .json({ error: { code: err.code, message: err.message } });
     return;
   }
-  if (err instanceof ZodError) {
+  if (
+    err instanceof SyntaxError &&
+    "status" in err &&
+    err.status === 400 &&
+    "type" in err &&
+    err.type === "entity.parse.failed"
+  ) {
     res
       .status(400)
       .json({
-        error: {
-          code: "VALIDATION",
-          message: "Invalid input",
-          details: err.issues,
-        },
+        error: { code: "INVALID_JSON", message: "Malformed JSON body" },
       });
+    return;
+  }
+  if (err instanceof ZodError) {
+    res.status(400).json({
+      error: {
+        code: "VALIDATION",
+        message: "Invalid input",
+        details: err.issues,
+      },
+    });
     return;
   }
   logger.error(err);

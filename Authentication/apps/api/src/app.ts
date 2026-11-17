@@ -5,6 +5,7 @@ import { prisma } from "./db/prisma.js";
 import { env } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(
   }),
 );
 app.use(cookieParser());
+app.use("/api/auth", authRoutes);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -27,7 +29,7 @@ app.get("/health/db", async (_req, res) => {
   res.json({ status: "ok", db: "connected" });
 });
 
-export default app;
-
 app.use(notFound);
 app.use(errorHandler);
+
+export default app;
