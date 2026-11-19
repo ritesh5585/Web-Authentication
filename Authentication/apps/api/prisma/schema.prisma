@@ -17,6 +17,7 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   otpCodes        OtpCode[]
+  session         Session[]
 }
 
 enum OtpPurpose {
@@ -35,4 +36,20 @@ model OtpCode {
   createdAt DateTime   @default(now())
 
   @@index([userId, purpose])
+}
+
+model Session {
+  id                   String    @id @default(uuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash     String
+  prevRefreshTokenHash String?
+  userAgent            String?
+  ip                   String?
+  expiresAt            DateTime
+  revokedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  lastUsedAt           DateTime  @default(now())
+
+  @@index([userId])
 }
