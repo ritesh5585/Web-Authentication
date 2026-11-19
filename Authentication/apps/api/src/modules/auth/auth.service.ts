@@ -87,10 +87,7 @@ export async function register(input: {
   }
 }
 
-export async function verifyEmail(input: {
-  email: string;
-  code: string;
-}) {
+export async function verifyEmail(input: { email: string; code: string }) {
   const user = await prisma.user.findUnique({
     where: { email: input.email },
   });
@@ -145,4 +142,11 @@ export async function resendOtp(email: string) {
     }
     throw e;
   }
+}
+
+export async function getMe(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || user.deletedAt)
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  return { id: user.id, email: user.email, name: user.name };
 }
