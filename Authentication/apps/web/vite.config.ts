@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "http://localhost:3000",
+        cookiePathRewrite: { "/auth": "/api/auth" },
       },
     },
   },
