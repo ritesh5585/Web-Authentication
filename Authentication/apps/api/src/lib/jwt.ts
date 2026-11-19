@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
 export const signAccessToken = (userId: string, sessionId: string) => {
-  jwt.sign({ session: sessionId }, env.JWT_ACCESS, {
+  return jwt.sign({ session: sessionId }, env.JWT_ACCESS, {
     subject: userId,
     expiresIn: env.ACCESS_TTL,
     algorithm: "HS256",
