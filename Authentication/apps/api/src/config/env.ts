@@ -16,6 +16,9 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string(),
+  JWT_ACCESS: z.string().min(32),
+  ACCESS_TTL: z.coerce.number().default(900),
+  REFRESH_TTL: z.coerce.number().default(7),
 });
 
 const parsed = schema.safeParse(process.env);

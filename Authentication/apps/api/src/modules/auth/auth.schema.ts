@@ -18,3 +18,8 @@ export const verifyEmailSchema = z
   .strict();
 
 export const resendOtpSchema = z.object({ email });
+
+export const loginSchema = z.object({
+  email,
+  password: z.string().min(1).max(128),
+});
